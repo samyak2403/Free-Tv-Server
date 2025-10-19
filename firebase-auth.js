@@ -69,20 +69,36 @@ class AuthManager {
 
     async register(email, password, displayName) {
         try {
+            console.log('Registering user:', email, 'with name:', displayName);
+            
+            // Create user account
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-            await userCredential.user.updateProfile({ displayName });
+            
+            // Update profile with display name
+            await userCredential.user.updateProfile({ 
+                displayName: displayName 
+            });
+            
+            console.log('Profile updated with display name:', displayName);
             
             // Create user profile in database
             await usersRef.child(userCredential.user.uid).set({
                 email: email,
                 displayName: displayName,
                 role: 'user',
-                createdAt: firebase.database.ServerValue.TIMESTAMP
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
             });
+            
+            console.log('User profile created in database');
+            
+            // Reload user to get updated profile
+            await userCredential.user.reload();
             
             showNotification('Registration successful!', 'success');
             return userCredential.user;
         } catch (error) {
+            console.error('Registration error:', error);
             showNotification(`Registration failed: ${error.message}`, 'error');
             throw error;
         }
@@ -97,19 +113,30 @@ class AuthManager {
         }
     }
 
-    onAuthSuccess(user) {
+    async onAuthSuccess(user) {
         console.log('Auth success, showing main app');
+        console.log('User display name:', user.displayName);
+        console.log('User email:', user.email);
+        
+        // Reload user to ensure we have latest profile data
+        await user.reload();
         
         const loginPage = document.getElementById('loginPage');
         const container = document.querySelector('.container');
-        const userInfo = document.querySelector('.user-info span');
+        const userDisplayName = document.getElementById('userDisplayName');
         
         if (loginPage) loginPage.style.display = 'none';
         if (container) container.style.display = 'flex';
-        if (userInfo) userInfo.textContent = user.displayName || user.email;
         
-        // Load user data
-        this.loadUserData(user.uid);
+        // Set display name with fallback
+        if (userDisplayName) {
+            const displayName = user.displayName || user.email.split('@')[0];
+            userDisplayName.textContent = displayName;
+            console.log('Display name set to:', displayName);
+        }
+        
+        // Load user data from database
+        await this.loadUserData(user.uid);
         
         // Load profile
         if (typeof profileManager !== 'undefined') {
@@ -129,10 +156,45 @@ class AuthManager {
     }
 
     async loadUserData(uid) {
-        const snapshot = await usersRef.child(uid).once('value');
-        const userData = snapshot.val();
-        if (userData) {
-            console.log('User data loaded:', userData);
+        try {
+            const snapshot = await usersRef.child(uid).once('value');
+            const userData = snapshot.val();
+            
+            if (userData) {
+                console.log('User data loaded from database:', userData);
+                
+                // Update display name if available in database
+                const userDisplayName = document.getElementById('userDisplayName');
+                if (userDisplayName && userData.displayName) {
+                    userDisplayName.textContent = userData.displayName;
+                    console.log('Display name updated from database:', userData.displayName);
+                }
+                
+                // Update current user display name if different
+                if (this.currentUser && userData.displayName && this.currentUser.displayName !== userData.displayName) {
+                    await this.currentUser.updateProfile({
+                        displayName: userData.displayName
+                    });
+                    await this.currentUser.reload();
+                    console.log('Firebase Auth profile updated with database name');
+                }
+            } else {
+                console.log('No user data found in database for uid:', uid);
+                
+                // Create user data in database if it doesn't exist
+                if (this.currentUser) {
+                    await usersRef.child(uid).set({
+                        email: this.currentUser.email,
+                        displayName: this.currentUser.displayName || this.currentUser.email.split('@')[0],
+                        role: 'user',
+                        createdAt: firebase.database.ServerValue.TIMESTAMP,
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                    console.log('Created user data in database');
+                }
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
         }
     }
 }
