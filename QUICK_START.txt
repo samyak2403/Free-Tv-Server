@@ -1,0 +1,110 @@
+========================================
+  QUICK START - Push to GitHub
+========================================
+
+BEFORE YOU START:
+1. Create a GitHub account at https://github.com
+2. Create a new repository named "servercontrol-web"
+3. DO NOT initialize with README (we have one)
+4. Keep it PUBLIC for educational sharing
+
+========================================
+  METHOD 1: Use the Batch Script (Easy)
+========================================
+
+1. Double-click: push-to-github.bat
+2. Enter your GitHub username when asked
+3. Enter your GitHub password/token when asked
+4. Done!
+
+========================================
+  METHOD 2: Manual Commands (Recommended)
+========================================
+
+Open Command Prompt or PowerShell in this folder and run:
+
+1. Initialize Git:
+   git init
+
+2. Add all files:
+   git add .
+
+3. Check what will be committed:
+   git status
+   (Make sure firebase-config.js is NOT listed!)
+
+4. Commit:
+   git commit -m "Initial commit: ServerControl Web Panel - Educational Project"
+
+5. Add remote (REPLACE YOUR_USERNAME):
+   git remote add origin https://github.com/YOUR_USERNAME/servercontrol-web.git
+
+6. Push to GitHub:
+   git branch -M main
+   git push -u origin main
+
+========================================
+  IMPORTANT SECURITY CHECK
+========================================
+
+Before pushing, verify:
+✓ firebase-config.js is in .gitignore
+✓ firebase-config.js does NOT appear in "git status"
+✓ Only firebase-config.example.js will be pushed
+
+If firebase-config.js appears in git status:
+   git rm --cached firebase-config.js
+   git commit -m "Remove firebase config"
+
+========================================
+  AFTER PUSHING
+========================================
+
+1. Go to: https://github.com/YOUR_USERNAME/servercontrol-web
+2. Verify files are there
+3. Check firebase-config.js is NOT visible
+4. Add description: "M3U Source Management Panel - Educational Project"
+5. Add topics: firebase, javascript, education, web-development
+
+========================================
+  TROUBLESHOOTING
+========================================
+
+Problem: "Permission denied"
+Solution: Check your GitHub credentials
+
+Problem: "Repository not found"
+Solution: Create the repository on GitHub first
+
+Problem: "firebase-config.js was pushed"
+Solution: 
+   1. Remove it: git rm --cached firebase-config.js
+   2. Commit: git commit -m "Remove config"
+   3. Push: git push
+   4. CHANGE YOUR FIREBASE CREDENTIALS!
+
+========================================
+  NEED HELP?
+========================================
+
+Read: GITHUB_SETUP.md (detailed guide)
+Or visit: https://docs.github.com/en/get-started
+
+========================================
+  YOUR REPOSITORY URL
+========================================
+
+After pushing, your project will be at:
+https://github.com/YOUR_USERNAME/servercontrol-web
+
+Share it with:
+- Classmates
+- Teachers  
+- Portfolio
+- Other learners
+
+========================================
+
+Remember: This is an EDUCATIONAL project! 📚
+
+Happy Coding! 🚀

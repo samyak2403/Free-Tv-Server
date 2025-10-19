@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ServerControl - M3U Source Management Panel for Educational Purposes">
+    <meta name="keywords" content="firebase, realtime database, admin panel, education">
+    <title>ServerControl - Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        crossorigin="anonymous">
+</head>
+
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-page">
+        <div class="login-container">
+            <div class="login-header">
+                <i class="fas fa-server"></i>
+                <h2>ServerControl</h2>
+                <p>Admin Panel Login</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="loginEmail" placeholder="admin@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+            <div class="login-footer">
+                <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
+            </div>
+        </div>
+        <div class="register-container" style="display: none;">
+            <div class="login-header">
+                <i class="fas fa-user-plus"></i>
+                <h2>Create Account</h2>
+                <p>Register for ServerControl</p>
+            </div>
+            <form id="registerForm" class="login-form">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Display Name</label>
+                    <input type="text" id="registerName" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="registerEmail" placeholder="admin@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="registerPassword" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-user-plus"></i> Register
+                </button>
+            </form>
+            <div class="login-footer">
+                <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-server"></i>
+                <h2>ServerControl</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-page="sources">
+                    <i class="fas fa-stream"></i>
+                    <span>Sources</span>
+                </a>
+                <a href="#" class="nav-item" data-page="monitoring">
+                    <i class="fas fa-desktop"></i>
+                    <span>Monitoring</span>
+                </a>
+                <a href="#" class="nav-item" data-page="logs">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Logs</span>
+                </a>
+                <a href="#" class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Admin User</span>
+                </div>
+                <button class="btn btn-secondary btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 id="pageTitle">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <button class="notification-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge" id="notificationBadge">0</span>
+                    </button>
+                    <button class="profile-btn" id="profileBtn">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Notification Panel -->
+            <div class="notification-panel" id="notificationPanel">
+                <div class="notification-header">
+                    <h3>
+                        <i class="fas fa-bell"></i>
+                        Notifications
+                    </h3>
+                    <div class="notification-actions">
+                        <button id="markAllRead" title="Mark all as read">
+                            <i class="fas fa-check-double"></i>
+                        </button>
+                        <button id="clearAllNotifications" title="Clear all">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="notification-list" id="notificationList">
+                    <!-- Notifications will be dynamically added -->
+                </div>
+            </div>
+
+            <header class="header" style="display: none;">
+            </header>
+
+            <!-- Dashboard Page -->
+            <div class="page active" id="dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-stream"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Active Sources</h3>
+                            <p class="stat-value">0</p>
+                            <span class="stat-change neutral">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Sources</h3>
+                            <p class="stat-value">0</p>
+                            <span class="stat-change neutral">All sources</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Regions</h3>
+                            <p class="stat-value">0</p>
+                            <span class="stat-change neutral">Unique regions</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-power-off"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Disabled</h3>
+                            <p class="stat-value">0</p>
+                            <span class="stat-change warning">Inactive sources</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="card chart-card">
+                        <h3>Source Activity</h3>
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                    <div class="card activity-card">
+                        <h3>
+                            <i class="fas fa-history"></i> Recent Activity
+                            <span class="live-indicator">
+                                <span class="live-dot"></span>
+                                <span
+                                    style="font-size: 0.75rem; color: var(--success-color); font-weight: 600;">LIVE</span>
+                            </span>
+                        </h3>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <i class="fas fa-info-circle info"></i>
+                                <div>
+                                    <p>Waiting for activity...</p>
+                                    <span>No recent activity</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sources Page -->
+            <div class="page" id="sources">
+                <div class="sources-header">
+                    <div class="search-filter-container">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="sourceSearch"
+                                placeholder="Search sources by name, URL, or region...">
+                            <button class="clear-search" id="clearSearch" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="filter-controls">
+                            <select id="statusFilter" class="filter-select">
+                                <option value="all">All Status</option>
+                                <option value="enabled">Enabled Only</option>
+                                <option value="disabled">Disabled Only</option>
+                            </select>
+                            <select id="regionFilter" class="filter-select">
+                                <option value="all">All Regions</option>
+                            </select>
+                            <select id="sortBy" class="filter-select">
+                                <option value="priority">Sort by Priority</option>
+                                <option value="name">Sort by Name</option>
+                                <option value="recent">Sort by Recent</option>
+                            </select>
+                            <button class="btn btn-secondary" id="resetFilters">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="openAddSourceModal()">
+                        <i class="fas fa-plus"></i> Add Source
+                    </button>
+                </div>
+                <div class="sources-info">
+                    <span id="sourcesCount">0 sources</span>
+                    <span id="filterInfo"></span>
+                </div>
+                <div class="sources-grid">
+                    <!-- Source cards will be dynamically generated -->
+                </div>
+            </div>
+
+            <!-- Monitoring Page -->
+            <div class="page" id="monitoring">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>CPU Usage</h3>
+                            <p class="stat-value" id="cpuUsage">0%</p>
+                            <span class="stat-change neutral">Real-time</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-memory"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Memory Usage</h3>
+                            <p class="stat-value" id="memoryUsage">0%</p>
+                            <span class="stat-change neutral">Real-time</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-hdd"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Disk Usage</h3>
+                            <p class="stat-value" id="diskUsage">0%</p>
+                            <span class="stat-change neutral">Real-time</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-network-wired"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Network</h3>
+                            <p class="stat-value" id="networkSpeed">0 MB/s</p>
+                            <span class="stat-change neutral">Real-time</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>Performance Chart</h3>
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>System Info</h3>
+                        <div class="system-info">
+                            <div class="info-item">
+                                <span><i class="fas fa-server"></i> Platform:</span>
+                                <strong id="platform">Loading...</strong>
+                            </div>
+                            <div class="info-item">
+                                <span><i class="fas fa-clock"></i> Uptime:</span>
+                                <strong id="uptime">Loading...</strong>
+                            </div>
+                            <div class="info-item">
+                                <span><i class="fas fa-database"></i> Total Sources:</span>
+                                <strong id="totalSourcesMonitor">0</strong>
+                            </div>
+                            <div class="info-item">
+                                <span><i class="fas fa-check-circle"></i> Active Sources:</span>
+                                <strong id="activeSourcesMonitor">0</strong>
+                            </div>
+                            <div class="info-item">
+                                <span><i class="fas fa-user"></i> Current User:</span>
+                                <strong id="currentUser">Loading...</strong>
+                            </div>
+                            <div class="info-item">
+                                <span><i class="fas fa-calendar"></i> Last Login:</span>
+                                <strong id="lastLogin">Loading...</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Page -->
+            <div class="page" id="logs">
+                <div class="card">
+                    <div class="logs-header">
+                        <h3>System Logs</h3>
+                        <button class="btn btn-secondary" onclick="exportLogs()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    <div class="logs-content" id="logsContent">
+                        <!-- Logs will be dynamically generated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div class="page" id="settings">
+                <div class="settings-grid">
+                    <!-- Profile Settings -->
+                    <div class="card">
+                        <h3><i class="fas fa-user-circle"></i> Profile Settings</h3>
+                        <form id="profileForm" class="settings-form">
+                            <div class="form-group">
+                                <label><i class="fas fa-user"></i> Display Name</label>
+                                <input type="text" id="profileName" placeholder="Your Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-envelope"></i> Email</label>
+                                <input type="email" id="profileEmail" readonly disabled>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-phone"></i> Phone Number</label>
+                                <input type="tel" id="profilePhone" placeholder="+1234567890">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-info-circle"></i> Bio</label>
+                                <textarea id="profileBio" rows="3" placeholder="Tell us about yourself..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Profile
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Password Change -->
+                    <div class="card">
+                        <h3><i class="fas fa-lock"></i> Change Password</h3>
+                        <form id="passwordForm" class="settings-form">
+                            <div class="form-group">
+                                <label><i class="fas fa-key"></i> Current Password</label>
+                                <input type="password" id="currentPassword" placeholder="Enter current password"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-key"></i> New Password</label>
+                                <input type="password" id="newPassword" placeholder="Enter new password" required
+                                    minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-key"></i> Confirm Password</label>
+                                <input type="password" id="confirmPassword" placeholder="Confirm new password" required
+                                    minlength="6">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-lock"></i> Change Password
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- App Settings -->
+                    <div class="card">
+                        <h3><i class="fas fa-cog"></i> Application Settings</h3>
+                        <div class="settings-form">
+                            <div class="setting-item">
+                                <div>
+                                    <strong>Auto-refresh Sources</strong>
+                                    <p>Automatically refresh sources every 30 seconds</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="autoRefresh" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div>
+                                    <strong>Show Notifications</strong>
+                                    <p>Display toast notifications for actions</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="showNotifications" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div>
+                                    <strong>Compact View</strong>
+                                    <p>Use compact card layout for sources</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="compactView">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div>
+                                    <strong>Performance Monitoring</strong>
+                                    <p>Enable real-time performance tracking</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="performanceMonitoring" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Info -->
+                    <div class="card">
+                        <h3><i class="fas fa-info-circle"></i> Account Information</h3>
+                        <div class="account-info">
+                            <div class="info-item">
+                                <span>User ID:</span>
+                                <strong id="userId">Loading...</strong>
+                            </div>
+                            <div class="info-item">
+                                <span>Account Created:</span>
+                                <strong id="accountCreated">Loading...</strong>
+                            </div>
+                            <div class="info-item">
+                                <span>Last Sign In:</span>
+                                <strong id="lastSignIn">Loading...</strong>
+                            </div>
+                            <div class="info-item">
+                                <span>Email Verified:</span>
+                                <strong id="emailVerified">Loading...</strong>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" id="verifyEmailBtn" style="margin-top: 1rem;">
+                            <i class="fas fa-envelope-open"></i> Send Verification Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Source Modal -->
+    <div id="sourceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Source</h3>
+                <button class="modal-close" onclick="closeSourceModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="sourceForm">
+                <input type="hidden" id="sourceId">
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Source Name</label>
+                    <input type="text" id="sourceName" placeholder="India IPTV" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-link"></i> M3U URL</label>
+                    <input type="url" id="sourceUrl" placeholder="https://example.com/playlist.m3u" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-globe"></i> Region</label>
+                    <input type="text" id="sourceRegion" placeholder="India, USA, UK, etc.">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-sort-numeric-up"></i> Priority (lower = higher priority)</label>
+                    <input type="number" id="sourcePriority" placeholder="1" min="1" value="999">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeSourceModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Add Source</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="firebase-config.js"></script>
+    <script src="firebase-auth.js"></script>
+    <script src="firebase-database.js"></script>
+    <script src="performance-monitor.js"></script>
+    <script src="profile-manager.js"></script>
+    <script src="activity-chart.js"></script>
+    <script src="source-filter.js"></script>
+    <script src="notification-manager.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
